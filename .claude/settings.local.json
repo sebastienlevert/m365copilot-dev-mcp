@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npx --yes -p @microsoft/m365agentstoolkit-cli atk:*)",
+      "Bash(npm link)",
+      "Bash(node -e:*)",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(node build/index.js:*)",
+      "Bash(npm unlink:*)",
+      "Bash(m365copilot-dev-mcp:*)"
+    ]
+  }
+}

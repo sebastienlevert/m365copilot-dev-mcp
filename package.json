@@ -1,0 +1,59 @@
+{
+  "name": "@microsoft/m365copilot-dev-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Microsoft 365 Copilot development - Tools for building, deploying, and managing M365 Copilot extensions and agents",
+  "type": "module",
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "microsoft-365",
+    "copilot",
+    "m365",
+    "copilot-studio",
+    "agents-toolkit",
+    "atk",
+    "teams",
+    "agents",
+    "declarative-copilot",
+    "copilot-extensions"
+  ],
+  "bin": {
+    "m365copilot-dev-mcp": "./build/index.js"
+  },
+  "main": "./build/index.js",
+  "files": [
+    "build",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && chmod +x build/index.js",
+    "dev": "tsc --watch",
+    "clean": "rm -rf build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "@microsoft/m365agentstoolkit-cli": "^1.1.3",
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^1.6.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/m365copilot-dev-mcp"
+  }
+}
