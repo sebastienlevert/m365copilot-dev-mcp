@@ -15,6 +15,8 @@ import {
   getBestPracticePrompt
 } from './best-practices.js';
 
+import { agentPrompts } from './agent-prompts.js';
+
 import { error as logError } from '../utils/logger.js';
 
 /**
@@ -23,7 +25,8 @@ import { error as logError } from '../utils/logger.js';
 export function listPrompts(): PromptDefinition[] {
   return [
     ...workflowPrompts,
-    ...bestPracticePrompts
+    ...bestPracticePrompts,
+    ...agentPrompts
   ];
 }
 
@@ -43,6 +46,20 @@ export function getPrompt(name: string, args: Record<string, string>): PromptMes
   const bestPracticeMessages = getBestPracticePrompt(name, args);
   if (bestPracticeMessages) {
     return bestPracticeMessages;
+  }
+
+  // Try agent prompts
+  const agentPrompt = agentPrompts.find(p => p.name === name);
+  if (agentPrompt) {
+    let content = agentPrompt.content;
+    // Replace placeholders with actual arguments
+    Object.entries(args).forEach(([key, value]) => {
+      content += `\n\n## ${key}\n\`\`\`\n${value}\n\`\`\``;
+    });
+    return [{
+      role: 'user',
+      content: { type: 'text', text: content }
+    }];
   }
 
   // Prompt not found

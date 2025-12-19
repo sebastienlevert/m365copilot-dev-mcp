@@ -20,6 +20,33 @@ This MCP server provides comprehensive tooling for Microsoft 365 Copilot develop
 - **Stdio Transport** - Local MCP server for development
 - **Cross-Platform** - Windows, macOS, and Linux support
 
+## ⚠️ Important: Always Use MCP Tools
+
+**CRITICAL**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations.
+
+### ❌ DO NOT Use Direct CLI Commands
+
+Never use these commands directly:
+- `npm run compile` or `npm run build`
+- `atk provision`, `atk deploy`, `atk package`, `atk publish`
+- `atk compile`, `atk validate`, `atk new`
+- `npx @microsoft/m365agentstoolkit-cli ...`
+- Any other direct `atk` or CLI commands
+
+### ✅ ALWAYS Use MCP Server Tools
+
+The MCP server provides dedicated tools for all operations:
+- Use `compile_typespec` instead of `npm run compile` or `atk compile`
+- Use `atk_provision` instead of `atk provision`
+- Use `atk_deploy` instead of `atk deploy`
+- Use `atk_package` instead of `atk package`
+- Use `atk_publish` instead of `atk publish`
+- And so on for all operations...
+
+**Why?** MCP tools provide consistent error handling, progress tracking, validation, and proper integration with the MCP protocol.
+
+For complete guidelines, see the `atk://usage-guidelines` resource in the MCP server.
+
 ## Installation
 
 ### Global Installation (Recommended)

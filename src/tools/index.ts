@@ -13,6 +13,8 @@ import { validateToolDefinition, executeValidateTool, ValidateSchema, ValidateAr
 import { versionToolDefinition, executeVersionTool, VersionSchema, VersionArgs } from './version.js';
 import { loginToolDefinition, executeLoginTool, LoginSchema, LoginArgs } from './login.js';
 import { logoutToolDefinition, executeLogoutTool, LogoutSchema, LogoutArgs } from './logout.js';
+import { compileTypeSpecToolDefinition, executeCompileTypeSpecTool, CompileTypeSpecSchema, CompileTypeSpecArgs } from './compile-typespec.js';
+import { getBestPracticesToolDefinition, executeGetBestPracticesTool, GetBestPracticesSchema, GetBestPracticesArgs } from './get-best-practices.js';
 import { ToolResult } from '../types/atk.js';
 import { createErrorResult } from '../utils/error-handler.js';
 import { error as logError } from '../utils/logger.js';
@@ -94,6 +96,16 @@ const toolRegistry: Map<string, ToolRegistryEntry> = new Map([
     definition: logoutToolDefinition,
     executor: executeLogoutTool,
     schema: LogoutSchema
+  }],
+  ['compile_typespec', {
+    definition: compileTypeSpecToolDefinition,
+    executor: executeCompileTypeSpecTool,
+    schema: CompileTypeSpecSchema
+  }],
+  ['get_best_practices', {
+    definition: getBestPracticesToolDefinition,
+    executor: executeGetBestPracticesTool,
+    schema: GetBestPracticesSchema
   }]
 ]);
 
@@ -200,6 +212,8 @@ export {
   VersionSchema,
   LoginSchema,
   LogoutSchema,
+  CompileTypeSpecSchema,
+  GetBestPracticesSchema,
   executeDoctorTool,
   executeNewTool,
   executeProvisionTool,
@@ -209,7 +223,9 @@ export {
   executeValidateTool,
   executeVersionTool,
   executeLoginTool,
-  executeLogoutTool
+  executeLogoutTool,
+  executeCompileTypeSpecTool,
+  executeGetBestPracticesTool
 };
 
 // Export type definitions
@@ -223,5 +239,7 @@ export type {
   ValidateArgs,
   VersionArgs,
   LoginArgs,
-  LogoutArgs
+  LogoutArgs,
+  CompileTypeSpecArgs,
+  GetBestPracticesArgs
 };

@@ -15,6 +15,8 @@ import {
   getExampleResource
 } from './examples.js';
 
+import { agentResources } from './agent-resources.js';
+
 import { error as logError } from '../utils/logger.js';
 
 /**
@@ -23,7 +25,8 @@ import { error as logError } from '../utils/logger.js';
 export function listResources(): ResourceDefinition[] {
   return [
     ...documentationResources,
-    ...exampleResources
+    ...exampleResources,
+    ...agentResources
   ];
 }
 
