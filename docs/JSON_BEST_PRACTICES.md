@@ -26,6 +26,20 @@ All operations MUST go through the MCP server tools for proper error handling, v
 2. **`compile_typespec`** - For TypeSpec compilation (not needed for JSON projects)
 3. **`get_best_practices`** - For loading best practices documentation
 
+### 📢 What to Tell Users
+
+**NEVER suggest users run direct CLI commands**. When suggesting next steps, ALWAYS use this format:
+
+❌ **WRONG**: "Run `atk provision --env local` to test it"
+❌ **WRONG**: "Deploy with `atk deploy`"
+❌ **WRONG**: "Validate using `atk validate`"
+
+✅ **CORRECT**: "Use the `atk_run` tool with `{\"command\": \"provision\", \"projectPath\": \"./project\", \"env\": \"local\"}`"
+✅ **CORRECT**: "Deploy using the `atk_run` tool with `{\"command\": \"deploy\", \"projectPath\": \"./project\"}`"
+✅ **CORRECT**: "Validate with the `atk_run` tool with `{\"command\": \"validate\", \"projectPath\": \"./project\"}`"
+
+**Key principle**: All CLI operations go through MCP tools, so all suggestions to users must reference the tools, not the CLI commands.
+
 ### 🔍 ALWAYS Validate After Code Generation
 After every successful code generation or modification:
 1. **First**: Use `atk_run` tool with `command: "validate"` to validate your JSON manifests

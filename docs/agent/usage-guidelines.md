@@ -8,7 +8,9 @@
 
 **CRITICAL**: Do NOT run tasks from `.vscode/tasks.json` or any task runner. Always use the CLI through MCP tools.
 
-- `npm run compile`
+**NEVER EVER run these commands directly or in any combination**:
+- `npm run compile` (use `compile_typespec` tool instead)
+- `cd /path && npm run compile` (use `compile_typespec` tool instead)
 - `npm run build`
 - `npm run deploy`
 - `atk provision`
@@ -52,6 +54,24 @@ The MCP server provides 3 main tools:
 4. **Validation**: Input validation happens before execution
 5. **Logging**: All operations are logged consistently
 6. **Integration**: Tools integrate with the MCP context and state
+
+## 📢 What to Tell Users
+
+**CRITICAL**: When providing suggestions or next steps to users, ALWAYS reference MCP tools, NEVER direct CLI commands.
+
+❌ **WRONG - Never say these**:
+- "Run `atk provision --env local`"
+- "You can now run `npm run compile`"
+- "Deploy with `atk deploy --env dev`"
+- "Execute `atk validate`"
+
+✅ **CORRECT - Always say these instead**:
+- "Use the `atk_run` tool with `{\"command\": \"provision\", \"projectPath\": \"./project\", \"env\": \"local\"}`"
+- "Use the `compile_typespec` tool with `{\"projectPath\": \"./project\"}`"
+- "Deploy using the `atk_run` tool with `{\"command\": \"deploy\", \"projectPath\": \"./project\", \"env\": \"dev\"}`"
+- "Validate with the `atk_run` tool with `{\"command\": \"validate\", \"projectPath\": \"./project\"}`"
+
+**Remember**: The MCP server is the ONLY interface. All suggestions must go through the tools.
 
 ## Example: Compiling TypeSpec
 

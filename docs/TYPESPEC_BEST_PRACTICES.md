@@ -10,8 +10,13 @@ applyTo: '**/*.tsp'
 **IMPORTANT**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations. NEVER use direct CLI commands.
 
 ### ❌ NEVER Use These Commands Directly
+
+**ABSOLUTELY FORBIDDEN - These will cause problems**:
 - **NEVER run tasks from `.vscode/tasks.json` or any task runner** → Always use MCP tools
-- `npm run compile` or `atk compile` → Use `compile_typespec` tool instead
+- `npm run compile` → Use `compile_typespec` tool instead
+- `cd /path && npm run compile` → Use `compile_typespec` tool instead
+- `atk compile` → Use `compile_typespec` tool instead
+- Any variation of npm/cd commands for compilation → Use `compile_typespec` tool instead
 - `atk provision` → Use `atk_run` tool with `command: "provision"`
 - `atk deploy` → Use `atk_run` tool with `command: "deploy"`
 - `atk package` → Use `atk_run` tool with `command: "package"`
@@ -26,6 +31,20 @@ All operations MUST go through the MCP server tools for proper error handling, v
 1. **`atk_run`** - For all ATK commands (provision, deploy, package, publish, validate, new, doctor, login, logout, version)
 2. **`compile_typespec`** - For TypeSpec compilation
 3. **`get_best_practices`** - For loading best practices documentation
+
+### 📢 What to Tell Users
+
+**NEVER suggest users run direct CLI commands**. When suggesting next steps, ALWAYS use this format:
+
+❌ **WRONG**: "Run `atk provision --env local` to test it"
+❌ **WRONG**: "You can now run `npm run compile`"
+❌ **WRONG**: "Deploy with `atk deploy`"
+
+✅ **CORRECT**: "Use the `atk_run` tool with `{\"command\": \"provision\", \"projectPath\": \"./project\", \"env\": \"local\"}`"
+✅ **CORRECT**: "Use the `compile_typespec` tool with `{\"projectPath\": \"./project\"}`"
+✅ **CORRECT**: "Deploy using the `atk_run` tool with `{\"command\": \"deploy\", \"projectPath\": \"./project\"}`"
+
+**Key principle**: All CLI operations go through MCP tools, so all suggestions to users must reference the tools, not the CLI commands.
 
 ### 🔍 ALWAYS Validate After Code Generation
 After every successful code generation or modification:

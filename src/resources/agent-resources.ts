@@ -77,7 +77,19 @@ Read the usage guidelines:
 
 ## Remember
 
-Always start with \`get_best_practices\` - it contains critical information you need to do agent work correctly.`;
+Always start with \`get_best_practices\` - it contains critical information you need to do agent work correctly.
+
+## 📢 CRITICAL: What to Tell Users
+
+**NEVER suggest direct CLI commands to users**. Always reference MCP tools:
+
+❌ WRONG: "Run \`atk provision --env local\`"
+✅ CORRECT: "Use the \`atk_run\` tool with \`{\"command\": \"provision\", \"projectPath\": \"./project\", \"env\": \"local\"}\`"
+
+❌ WRONG: "Run \`npm run compile\`"
+✅ CORRECT: "Use the \`compile_typespec\` tool with \`{\"projectPath\": \"./project\"}\`"
+
+The MCP server is the ONLY interface - all operations go through tools.`;
     }
   },
   {

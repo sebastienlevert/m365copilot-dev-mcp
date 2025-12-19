@@ -50,7 +50,31 @@ export async function executeCompileTypeSpecTool(rawArgs: unknown): Promise<Tool
   // Extract progress callback if provided
   const onProgress = (args as any)._onProgress;
 
+  // First, generate environment variables
+  if (onProgress) {
+    onProgress('Generating environment variables...', 'info');
+  }
+
+  const generateEnvResult = await executeATKCommand({
+    command: 'npm',
+    args: ['run', 'generate:env'],
+    cwd: absolutePath,
+    timeout: 30000,
+    onProgress
+  });
+
+  if (!generateEnvResult.success) {
+    // Don't fail if generate:env doesn't exist or fails - it might not be required
+    if (onProgress) {
+      onProgress('Note: generate:env script not found or failed (this may be normal)', 'info');
+    }
+  }
+
   // Run TypeSpec compilation
+  if (onProgress) {
+    onProgress('Compiling TypeSpec...', 'info');
+  }
+
   const result = await executeATKCommand({
     command: 'npx',
     args: ['--package=@typespec/compiler', 'tsp', 'compile', './src/agent/main.tsp', '--config', './tspconfig.yaml'],
@@ -113,14 +137,21 @@ export const compileTypeSpecToolDefinition = {
   name: 'compile_typespec',
   description: `Compile TypeSpec agent definitions with detailed error reporting.
 
+**CRITICAL**: ALWAYS use this tool to compile TypeSpec. NEVER use:
+- \`npm run compile\`
+- \`cd ... && npm run compile\`
+- Any direct CLI compile commands
+- Tasks from .vscode/tasks.json
+
 **Purpose:**
 Compiles TypeSpec files to generate manifest.json and declarativeAgent.json files. Essential step before provisioning or validating the agent.
 
 **What It Does:**
-- Runs TypeSpec compiler on src/agent/main.tsp
-- Generates output files in .generated/ directory
-- Reports compilation errors with line numbers
-- Optionally validates the generated manifest
+1. Generates environment variables (npm run generate:env)
+2. Runs TypeSpec compiler on src/agent/main.tsp
+3. Generates output files in .generated/ directory
+4. Reports compilation errors with line numbers
+5. Optionally validates the generated manifest
 
 **When to Use:**
 - After making changes to TypeSpec files
