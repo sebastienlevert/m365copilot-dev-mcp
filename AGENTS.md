@@ -2,6 +2,50 @@
 
 This document provides guidance for AI agents and developers working on the @microsoft/m365copilot-dev-mcp MCP server. Follow these patterns and practices to maintain code quality, ensure thorough testing, and enable efficient development.
 
+---
+
+## 🚨 CRITICAL: README Update Requirement
+
+**MANDATORY FOR EVERY CODING SESSION:**
+
+Before ending ANY coding session that makes changes to the MCP server's capabilities, you MUST:
+
+1. **Check if README.md needs updating** - If your changes affect:
+   - Available tools (added, removed, or modified tools)
+   - How tools work or what they do
+   - ATK CLI commands or usage patterns
+   - Installation or configuration steps
+   - Feature descriptions or capabilities
+   - Quick start or getting started instructions
+   - Architecture or technology stack
+   - Any user-facing functionality
+
+2. **Update README.md immediately** - Do NOT skip this step. The README is the primary documentation users see.
+
+3. **Keep README in sync** - The README must always accurately reflect:
+   - Current tool count and names
+   - Correct command syntax and examples
+   - Accurate feature descriptions
+   - Current best practices and workflows
+   - Up-to-date installation/configuration instructions
+
+**Why This Matters:**
+- Users and AI assistants rely on README for accurate information
+- Outdated documentation causes confusion and support issues
+- README is often the first (and sometimes only) documentation users read
+- Inaccurate tool counts or descriptions damage credibility
+
+**Example Changes That REQUIRE README Updates:**
+- ✅ Removed `atk_run` tool → Update tool count from 3 to 2
+- ✅ Changed how ATK commands are executed → Update examples and instructions
+- ✅ Modified tool behavior → Update tool descriptions
+- ✅ Added new features → Update feature list
+- ✅ Changed command syntax → Update all command examples
+
+**If you're unsure whether README needs updating, UPDATE IT. Better to be thorough than to leave it outdated.**
+
+---
+
 ## Project Vision
 
 This MCP server is designed to be a comprehensive toolkit for **Microsoft 365 Copilot development**, not limited to just the Agents Toolkit (ATK). While ATK tools are the initial focus, the architecture supports adding additional M365 Copilot development capabilities, such as:
@@ -22,10 +66,11 @@ This MCP server is designed to be a comprehensive toolkit for **Microsoft 365 Co
 - Key imports: `Server`, `StdioServerTransport`, request schemas
 
 **Microsoft 365 Agents Toolkit CLI**
-- Package: `@microsoft/m365agentstoolkit-cli@^1.1.3`
+- Package: `@microsoft/m365agentstoolkit-cli@latest` (always use @latest)
 - Execution: Via npx with proper package specification
 - Purpose: Backend CLI for agent operations
-- Command pattern: `npx --yes -p @microsoft/m365agentstoolkit-cli atk <subcommand>`
+- Command pattern: `npx -p @microsoft/m365agentstoolkit-cli@latest atk <subcommand>`
+- **Important**: AI assistants run commands directly via bash, NOT through a tool wrapper
 
 **TypeScript**
 - Version: 5.3+
@@ -54,23 +99,18 @@ src/
 ├── server.ts             # MCP server setup and request handlers
 ├── tools/                # MCP tool implementations
 │   ├── index.ts         # Tool registry and dispatcher
-│   ├── doctor.ts        # System diagnostics tool
-│   ├── new.ts           # Project creation tool
-│   ├── provision.ts     # Resource provisioning tool
-│   ├── deploy.ts        # Code deployment tool
-│   ├── package.ts       # Package building tool
-│   ├── publish.ts       # Publishing tool
-│   └── validate.ts      # Validation tool
+│   ├── compile-typespec.ts  # TypeSpec compilation tool
+│   ├── get-best-practices.ts  # Best practices and CLI reference loader
+│   └── atk-run.ts       # ATK command runner (code reference only, not in registry)
 ├── prompts/              # MCP prompt implementations
 │   ├── index.ts         # Prompt registry
-│   ├── workflows.ts     # Workflow prompts
-│   └── best-practices.ts # Best practice prompts
+│   ├── agent-prompts.ts # Agent workflow prompts
+│   └── (other prompt files)
 ├── resources/            # MCP resource implementations
 │   ├── index.ts         # Resource registry
-│   ├── documentation.ts # Documentation resources
-│   └── examples.ts      # Example resources
+│   ├── agent-resources.ts # Agent documentation resources
+│   └── (other resource files)
 ├── utils/                # Shared utilities
-│   ├── cli-executor.ts  # CLI command execution (CRITICAL)
 │   ├── logger.ts        # Logging utility
 │   └── error-handler.ts # Error parsing and formatting
 └── types/                # Type definitions
@@ -83,9 +123,14 @@ tests/                    # Test files (mirror src/ structure)
 └── utils/
 
 docs/                     # Documentation files
-├── ATK_COMMANDS.md
-├── WORKFLOWS.md
-└── TROUBLESHOOTING.md
+├── ATK_CLI_REFERENCE.md  # Complete ATK CLI command reference
+├── TYPESPEC_BEST_PRACTICES.md  # TypeSpec patterns and guidance
+├── JSON_BEST_PRACTICES.md  # JSON manifest patterns and guidance
+└── agent/               # Agent-specific documentation
+    ├── usage-guidelines.md  # MCP server usage patterns
+    ├── capabilities.md  # M365 capabilities reference
+    ├── decorators.md    # TypeSpec decorator reference
+    └── (other guides)
 ```
 
 ### Architectural Patterns

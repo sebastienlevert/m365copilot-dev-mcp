@@ -4,14 +4,21 @@ Build Microsoft 365 Copilot agents faster with AI-powered development tools. Thi
 
 ## Why Use This?
 
-Stop context-switching between your AI assistant and terminal commands. Get intelligent guidance, automated workflows, and seamless project management—all within your AI coding environment.
+**Build M365 agents by talking to your AI assistant in plain English.** No need to learn complex CLI commands or switch between terminal windows. Just describe what you want to do, and your AI handles all the technical execution automatically.
+
+**Traditional approach:** Learn ATK CLI → Remember commands → Run commands manually → Debug errors → Repeat
+
+**With this MCP server:** *"Create a customer support agent"* → Done. Your AI understands intent, loads best practices, executes commands, and guides you through deployment.
 
 ## Features
 
-- **3 Powerful Tools** - Unified commands for the entire agent lifecycle
-  - `atk_run` - Execute any ATK command (new, provision, deploy, package, publish, validate, doctor, login, logout)
-  - `compile_typespec` - Build type-safe agent definitions
-  - `get_best_practices` - Access expert guidance on-demand
+- **2 Powerful MCP Tools** - Specialized tools for agent development
+  - `compile_typespec` - Build type-safe agent definitions with TypeSpec compilation
+  - `get_best_practices` - Access comprehensive documentation, ATK CLI reference, and expert guidance on-demand
+- **Direct ATK CLI Integration** - Run all ATK commands directly via `npx -p @microsoft/m365agentstoolkit-cli@latest`
+  - Commands: `new`, `provision`, `deploy`, `package`, `publish`, `validate`, `doctor`, `share`, `auth`, and more
+  - Always uses latest version
+  - No global installation required
 - **11 Guided Prompts** - Step-by-step workflows and best practices for common tasks
 - **23 Documentation Resources** - Comprehensive guides, examples, and troubleshooting
 - **TypeSpec-First** - Build declarative agents with full type safety and IntelliSense
@@ -19,11 +26,22 @@ Stop context-switching between your AI assistant and terminal commands. Get inte
 
 ## Quick Start
 
+**No command-line experience needed!** Just talk to your AI assistant in natural language.
+
 Get started in 3 steps:
 
 1. **Install the MCP server** (see Installation below)
 2. **Configure your AI client** (see Configuration below)
-3. **Start building**: Ask your AI assistant to create a new agent with `atk_run`
+3. **Start building**: Simply ask your AI assistant
+   - *"Create a new M365 agent for customer support"*
+   - *"Deploy my agent to the dev environment"*
+   - *"Share this agent with my team"*
+
+   The AI understands your intent and automatically:
+   - Loads best practices and command reference
+   - Determines the right ATK commands to run
+   - Executes everything with correct parameters
+   - Provides helpful results and next steps
 
 ## Installation
 
@@ -95,50 +113,119 @@ Configure stdio transport with command: `m365copilot-dev-mcp`
 
 ## Core Tools
 
-### atk_run - Unified ATK Command Runner
-
-Execute any Microsoft 365 Agents Toolkit command through a single interface.
-
-**Supported commands**: `new`, `provision`, `deploy`, `package`, `publish`, `validate`, `doctor`, `login`, `logout`, `version`
-
-**Example**: Create a new agent
-```json
-{
-  "command": "new",
-  "name": "my-customer-agent",
-  "template": "declarative-agent",
-  "format": "typespec"
-}
-```
-
-**Example**: Deploy to Azure
-```json
-{
-  "command": "deploy",
-  "projectPath": "./my-customer-agent",
-  "env": "dev"
-}
-```
-
 ### compile_typespec - TypeSpec Compilation
 
 Build type-safe agent definitions from TypeSpec source files.
 
+**Parameters:**
 ```json
 {
   "projectPath": "./my-agent"
 }
 ```
 
-### get_best_practices - Expert Guidance
+**What it does:**
+- Compiles TypeSpec agent definitions to JSON manifests
+- Validates TypeSpec syntax and structure
+- Generates declarativeAgent.json and manifest.json files
+- Reports compilation errors with helpful guidance
 
-Access documentation on TypeSpec patterns, agent design, security, and more.
+### get_best_practices - Expert Guidance & CLI Reference
 
+Access comprehensive documentation including TypeSpec/JSON best practices AND complete ATK CLI reference.
+
+**⚠️ CRITICAL:** AI assistants MUST call this tool FIRST before any agent work!
+
+**Parameters:**
 ```json
 {
-  "topic": "typespec-patterns"
+  "type": "typespec"  // or "json" or "both"
 }
 ```
+
+**What it includes:**
+- Best practices for TypeSpec or JSON agent development
+- Complete ATK CLI reference with all commands and parameters
+- Correct command syntax: `npx -p @microsoft/m365agentstoolkit-cli@latest atk <command>`
+- Capability scoping patterns
+- Response formatting guidelines
+- Critical warnings about what NOT to do
+
+**Once loaded, you don't need to call it again in the same session.**
+
+## How It Works: Intent-Based Automation
+
+**You don't need to learn or remember any commands!**
+
+When you tell your AI assistant what you want to do in natural language:
+- "I want to create a new agent"
+- "Deploy my agent to dev"
+- "Share this with my team"
+
+The AI assistant will:
+1. Understand your intent
+2. Check the loaded best practices and CLI reference
+3. Determine the appropriate ATK command(s) to run
+4. Execute the commands with correct parameters
+5. Format the results with helpful next steps
+
+**The commands shown below are for reference only** - your AI assistant handles all command execution automatically.
+
+## Running ATK Commands (For Reference)
+
+All ATK CLI commands are executed directly via bash using:
+
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk <command> [options]
+```
+
+**Key ATK Commands:**
+
+**Create new agent:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk new -n my-agent -c declarative-agent -with-plugin type-spec -i false
+```
+
+**Provision Azure resources:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev
+```
+
+**Deploy agent:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev
+```
+
+**Package agent:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev
+```
+
+**Share with tenant:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false
+```
+
+**Share with specific users:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope users --email 'user@domain.com' --env dev -i false
+```
+
+**Validate agent:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk validate
+```
+
+**Check environment:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk doctor
+```
+
+**Why `npx -p @latest`?**
+- Always uses the latest ATK version
+- No global installation required
+- Consistent across all environments
+- Perfect for CI/CD pipelines
 
 ## Guided Workflows
 
@@ -165,27 +252,48 @@ Query resources via URIs like `atk://docs/commands` or `atk://examples/declarati
 
 ## Get Started: Build Your First Agent
 
-Once configured, simply ask your AI assistant:
+Once configured, simply ask your AI assistant in natural language:
 
 > "Create a new M365 agent called customer-support-agent using TypeSpec"
 
-The AI will use the `atk_run` tool to scaffold your project, guide you through the setup, and help you deploy it to Microsoft 365.
+**You don't need to know or run any commands yourself!** The AI assistant will:
+1. Understand your intent
+2. Load best practices and ATK CLI reference using `get_best_practices` tool
+3. Automatically determine the right ATK command to run
+4. Execute commands directly via `npx @latest`
+5. Compile TypeSpec using `compile_typespec` tool
+6. Guide you through the setup and deployment
+
+**Just describe what you want to do** - the AI handles all the technical details and command execution.
 
 ### Example Development Flow
 
-1. **Create** - "Create a new declarative agent for handling FAQs"
-2. **Validate** - "Validate my agent configuration"
-3. **Deploy** - "Provision Azure resources and deploy to dev environment"
-4. **Test** - "Package and publish my agent"
+**Just tell your AI what you want to do in plain English:**
 
-Your AI assistant handles all the complexity—you focus on building great agents.
+1. **Create**
+   - You say: *"Create a new declarative agent for handling FAQs"*
+   - AI automatically: Loads best practices → Runs `atk new` command → Sets up project
+
+2. **Compile & Validate**
+   - You say: *"Compile my TypeSpec and validate the agent"*
+   - AI automatically: Uses `compile_typespec` tool → Runs `atk validate` command
+
+3. **Deploy**
+   - You say: *"Provision Azure resources and deploy to dev environment"*
+   - AI automatically: Runs `atk provision` → Runs `atk deploy` → Provides test link
+
+4. **Package & Share**
+   - You say: *"Package and share my agent with my team"*
+   - AI automatically: Checks AGENT_SCOPE → Runs `atk package` → Runs `atk share` with correct parameters
+
+**You focus on WHAT you want to build. The AI figures out HOW to execute it.**
 
 ### Common Workflows
 
-**New Project**: Check prerequisites → Create project → Validate → Provision → Deploy  
-**Update Code**: Validate → Deploy  
-**Update Manifest**: Validate → Package → Publish  
-**New Environment**: Provision → Deploy → Package → Publish
+**New Project**: Load best practices → Create project (`atk new`) → Compile TypeSpec → Provision → Deploy
+**Update Code**: Compile TypeSpec → Deploy (`atk deploy`)
+**Update Manifest**: Compile TypeSpec → Package (`atk package`) → Publish (`atk publish`)
+**New Environment**: Provision (`atk provision`) → Deploy → Package → Share (if AGENT_SCOPE=shared)
 
 ## Architecture & Technology
 
