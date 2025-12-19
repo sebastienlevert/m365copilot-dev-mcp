@@ -10,20 +10,34 @@ applyTo: '**/declarativeAgent.json,**/manifest.json,**/*-apiplugin.json'
 **IMPORTANT**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations. NEVER use direct CLI commands.
 
 ### ❌ NEVER Use These Commands Directly
-- `atk provision` → Use `atk_provision` tool instead
-- `atk deploy` → Use `atk_deploy` tool instead
-- `atk package` → Use `atk_package` tool instead
-- `atk publish` → Use `atk_publish` tool instead
-- `atk validate` → Use `atk_validate` tool instead
+- **NEVER run tasks from `.vscode/tasks.json` or any task runner** → Always use MCP tools
+- `atk provision` → Use `atk_run` tool with `command: "provision"`
+- `atk deploy` → Use `atk_run` tool with `command: "deploy"`
+- `atk package` → Use `atk_run` tool with `command: "package"`
+- `atk publish` → Use `atk_run` tool with `command: "publish"`
+- `atk validate` → Use `atk_run` tool with `command: "validate"`
 - `npx @microsoft/m365agentstoolkit-cli ...` → Use appropriate MCP tool
 
 ### ✅ ALWAYS Use MCP Server Tools
 All operations MUST go through the MCP server tools for proper error handling, validation, and integration.
 
+**The 3 Main Tools:**
+1. **`atk_run`** - For all ATK commands (provision, deploy, package, publish, validate, new, doctor, login, logout, version)
+2. **`compile_typespec`** - For TypeSpec compilation (not needed for JSON projects)
+3. **`get_best_practices`** - For loading best practices documentation
+
 ### 🔍 ALWAYS Validate After Code Generation
 After every successful code generation or modification:
-1. **First**: Use `atk_validate` tool to validate your JSON manifests
-2. **Then**: Use `atk_package` tool to validate the complete agent package
+1. **First**: Use `atk_run` tool with `command: "validate"` to validate your JSON manifests
+   ```json
+   {"command": "validate", "projectPath": "./my-agent"}
+   ```
+   - The `env` parameter defaults to "local" if not specified
+2. **Then**: Use `atk_run` tool with `command: "package"` to validate the complete agent package
+   ```json
+   {"command": "package", "projectPath": "./my-agent"}
+   ```
+   - The `env` parameter defaults to "local" if not specified
 3. **Never skip** these validation steps - they catch errors early
 
 ---
@@ -1286,8 +1300,16 @@ For Model Context Protocol servers:
 ## Validation and Testing
 
 ### Validation Tools
-- **CRITICAL**: Use `atk_validate` MCP tool to validate manifests (NEVER use `atk validate` directly)
-- **CRITICAL**: After successful validation, use `atk_package` MCP tool to validate the complete agent package
+- **CRITICAL**: Use `atk_run` MCP tool with `command: "validate"` to validate manifests (NEVER use `atk validate` directly)
+  ```json
+  {"command": "validate", "projectPath": "./my-agent"}
+  ```
+  - The `env` parameter defaults to "local" if not specified
+- **CRITICAL**: After successful validation, use `atk_run` MCP tool with `command: "package"` to validate the complete agent package
+  ```json
+  {"command": "package", "projectPath": "./my-agent"}
+  ```
+  - The `env` parameter defaults to "local" if not specified
 - Validate against JSON schemas before deployment
 - Check character limits and required fields
 - Verify file paths and references are correct
@@ -1380,39 +1402,69 @@ publish:
 
 ### Local Development
 1. Create or edit JSON manifests
-2. Validate manifests using `atk_validate` MCP tool
-3. Package and validate using `atk_package` MCP tool
+2. Validate manifests using `atk_run` MCP tool (env defaults to "local"):
+   ```json
+   {"command": "validate", "projectPath": "./my-agent"}
+   ```
+3. Package and validate using `atk_run` MCP tool (env defaults to "local"):
+   ```json
+   {"command": "package", "projectPath": "./my-agent"}
+   ```
 4. Test locally with preview tools
 5. Iterate on instructions and capabilities
 
 **CRITICAL**: Always use MCP tools, NEVER use direct `atk` commands.
 
 ### Deployment to Azure
-1. **Provision**: Use `atk_provision` MCP tool with `{"env": "dev"}`
+1. **Provision**: Use `atk_run` MCP tool:
+   ```json
+   {"command": "provision", "projectPath": "./my-agent", "env": "dev"}
+   ```
    - Creates Azure resources
    - Generates environment configuration
 
-2. **Deploy**: Use `atk_deploy` MCP tool with `{"env": "dev"}`
+2. **Deploy**: Use `atk_run` MCP tool:
+   ```json
+   {"command": "deploy", "projectPath": "./my-agent", "env": "dev"}
+   ```
    - Builds and uploads code
    - Updates application configuration
 
-3. **Package**: Use `atk_package` MCP tool with `{"env": "dev"}`
+3. **Package**: Use `atk_run` MCP tool:
+   ```json
+   {"command": "package", "projectPath": "./my-agent", "env": "dev"}
+   ```
    - Creates app package with manifest and resources
    - Validates package integrity
 
-4. **Publish**: Use `atk_publish` MCP tool with `{"env": "dev"}`
+4. **Publish**: Use `atk_run` MCP tool:
+   ```json
+   {"command": "publish", "projectPath": "./my-agent", "env": "dev"}
+   ```
    - Uploads to Microsoft 365
    - Makes agent available to users
 
 ### Production Deployment
 1. Test thoroughly in dev environment
 2. Update environment-specific values (.env.prod)
-3. Provision production resources using `atk_provision` MCP tool with `{"env": "prod"}`
-4. Deploy to production using `atk_deploy` MCP tool with `{"env": "prod"}`
-5. Package production app using `atk_package` MCP tool with `{"env": "prod"}`
-6. Publish to production using `atk_publish` MCP tool with `{"env": "prod"}`
+3. Provision production resources:
+   ```json
+   {"command": "provision", "projectPath": "./my-agent", "env": "prod"}
+   ```
+4. Deploy to production:
+   ```json
+   {"command": "deploy", "projectPath": "./my-agent", "env": "prod"}
+   ```
+5. Package production app:
+   ```json
+   {"command": "package", "projectPath": "./my-agent", "env": "prod"}
+   ```
+6. Publish to production:
+   ```json
+   {"command": "publish", "projectPath": "./my-agent", "env": "prod"}
+   ```
 
-**Remember**: All deployment operations MUST use MCP server tools.
+**Remember**: All deployment operations MUST use MCP server tools with the `atk_run` tool.
 
 ## Best Practices
 

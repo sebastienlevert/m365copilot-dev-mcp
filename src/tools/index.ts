@@ -3,16 +3,7 @@
  * Provides centralized tool management for MCP server
  */
 
-import { doctorToolDefinition, executeDoctorTool, DoctorSchema, DoctorArgs } from './doctor.js';
-import { newToolDefinition, executeNewTool, NewProjectSchema, NewProjectArgs } from './new.js';
-import { provisionToolDefinition, executeProvisionTool, ProvisionSchema, ProvisionArgs } from './provision.js';
-import { deployToolDefinition, executeDeployTool, DeploySchema, DeployArgs } from './deploy.js';
-import { packageToolDefinition, executePackageTool, PackageSchema, PackageArgs } from './package.js';
-import { publishToolDefinition, executePublishTool, PublishSchema, PublishArgs } from './publish.js';
-import { validateToolDefinition, executeValidateTool, ValidateSchema, ValidateArgs } from './validate.js';
-import { versionToolDefinition, executeVersionTool, VersionSchema, VersionArgs } from './version.js';
-import { loginToolDefinition, executeLoginTool, LoginSchema, LoginArgs } from './login.js';
-import { logoutToolDefinition, executeLogoutTool, LogoutSchema, LogoutArgs } from './logout.js';
+import { atkRunToolDefinition, executeATKRunTool, ATKRunSchema, ATKRunArgs } from './atk-run.js';
 import { compileTypeSpecToolDefinition, executeCompileTypeSpecTool, CompileTypeSpecSchema, CompileTypeSpecArgs } from './compile-typespec.js';
 import { getBestPracticesToolDefinition, executeGetBestPracticesTool, GetBestPracticesSchema, GetBestPracticesArgs } from './get-best-practices.js';
 import { ToolResult } from '../types/atk.js';
@@ -47,55 +38,10 @@ interface ToolRegistryEntry {
 }
 
 const toolRegistry: Map<string, ToolRegistryEntry> = new Map([
-  ['atk_doctor', {
-    definition: doctorToolDefinition,
-    executor: executeDoctorTool,
-    schema: DoctorSchema
-  }],
-  ['atk_new', {
-    definition: newToolDefinition,
-    executor: executeNewTool,
-    schema: NewProjectSchema
-  }],
-  ['atk_provision', {
-    definition: provisionToolDefinition,
-    executor: executeProvisionTool,
-    schema: ProvisionSchema
-  }],
-  ['atk_deploy', {
-    definition: deployToolDefinition,
-    executor: executeDeployTool,
-    schema: DeploySchema
-  }],
-  ['atk_package', {
-    definition: packageToolDefinition,
-    executor: executePackageTool,
-    schema: PackageSchema
-  }],
-  ['atk_publish', {
-    definition: publishToolDefinition,
-    executor: executePublishTool,
-    schema: PublishSchema
-  }],
-  ['atk_validate', {
-    definition: validateToolDefinition,
-    executor: executeValidateTool,
-    schema: ValidateSchema
-  }],
-  ['atk_version', {
-    definition: versionToolDefinition,
-    executor: executeVersionTool,
-    schema: VersionSchema
-  }],
-  ['atk_login', {
-    definition: loginToolDefinition,
-    executor: executeLoginTool,
-    schema: LoginSchema
-  }],
-  ['atk_logout', {
-    definition: logoutToolDefinition,
-    executor: executeLogoutTool,
-    schema: LogoutSchema
+  ['atk_run', {
+    definition: atkRunToolDefinition,
+    executor: executeATKRunTool,
+    schema: ATKRunSchema
   }],
   ['compile_typespec', {
     definition: compileTypeSpecToolDefinition,
@@ -202,44 +148,17 @@ export function hasTool(name: string): boolean {
 
 // Export all tool schemas and executors for direct use if needed
 export {
-  DoctorSchema,
-  NewProjectSchema,
-  ProvisionSchema,
-  DeploySchema,
-  PackageSchema,
-  PublishSchema,
-  ValidateSchema,
-  VersionSchema,
-  LoginSchema,
-  LogoutSchema,
+  ATKRunSchema,
   CompileTypeSpecSchema,
   GetBestPracticesSchema,
-  executeDoctorTool,
-  executeNewTool,
-  executeProvisionTool,
-  executeDeployTool,
-  executePackageTool,
-  executePublishTool,
-  executeValidateTool,
-  executeVersionTool,
-  executeLoginTool,
-  executeLogoutTool,
+  executeATKRunTool,
   executeCompileTypeSpecTool,
   executeGetBestPracticesTool
 };
 
 // Export type definitions
 export type {
-  DoctorArgs,
-  NewProjectArgs,
-  ProvisionArgs,
-  DeployArgs,
-  PackageArgs,
-  PublishArgs,
-  ValidateArgs,
-  VersionArgs,
-  LoginArgs,
-  LogoutArgs,
+  ATKRunArgs,
   CompileTypeSpecArgs,
   GetBestPracticesArgs
 };

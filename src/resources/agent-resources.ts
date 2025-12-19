@@ -22,6 +22,65 @@ function loadMarkdownResource(filename: string): string {
 
 export const agentResources = [
   {
+    uri: 'atk://quick-start',
+    name: 'Quick Start: First Steps',
+    description: 'CRITICAL: First steps when working with agents. Read this before starting any agent work.',
+    mimeType: 'text/markdown',
+    get content() {
+      return `# Quick Start: Working with M365 Agents
+
+## Before You Start ANY Agent Work
+
+**CRITICAL FIRST STEP**: When asked to work on agents (create, modify, enhance, add features, etc.), you MUST:
+
+### 1. Load Best Practices FIRST
+
+Use the \`get_best_practices\` tool:
+
+\`\`\`json
+{"type": "both"}
+\`\`\`
+
+This loads comprehensive guidance on:
+- Available M365 capabilities (WebSearch, OneDrive, GraphConnector, etc.)
+- How to properly scope capabilities in definitions
+- Action patterns and API plugin structure
+- Authentication patterns
+- Instructions best practices
+- Common mistakes to avoid
+
+**Why this matters**: Without the best practices, you will likely:
+- Put scoping in instructions instead of definitions (wrong!)
+- Miss available capabilities that could enhance the agent
+- Create improperly structured actions
+- Skip validation steps
+
+### 2. Review the MCP Tools
+
+Read the usage guidelines:
+- \`atk://usage-guidelines\` resource
+- Or use \`get_best_practices\` tool which includes MCP tool usage
+
+### 3. Common Scenarios
+
+**Creating a new agent**: \`get_best_practices\` → \`atk_run\` with \`command: "new"\`
+
+**Enhancing an existing agent**: \`get_best_practices\` → Review code → Make changes → \`compile_typespec\` → \`atk_run\` with \`command: "package"\`
+
+**Adding capabilities**: \`get_best_practices\` (to see all available capabilities) → Add to definitions with proper scoping
+
+## The 3 Main MCP Tools
+
+1. **\`get_best_practices\`** - Load best practices documentation
+2. **\`compile_typespec\`** - Compile TypeSpec agents
+3. **\`atk_run\`** - Run all ATK commands (provision, deploy, package, validate, etc.)
+
+## Remember
+
+Always start with \`get_best_practices\` - it contains critical information you need to do agent work correctly.`;
+    }
+  },
+  {
     uri: 'atk://usage-guidelines',
     name: 'MCP Server Usage Guidelines',
     description: 'CRITICAL: Guidelines for using MCP server tools instead of direct CLI commands. Always read this first.',

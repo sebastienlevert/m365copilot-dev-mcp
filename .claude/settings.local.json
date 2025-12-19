@@ -14,7 +14,9 @@
       "Bash(node build/index.js:*)",
       "Bash(npm unlink:*)",
       "Bash(m365copilot-dev-mcp:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ]
   }
 }

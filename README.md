@@ -35,13 +35,19 @@ Never use these commands directly:
 
 ### ✅ ALWAYS Use MCP Server Tools
 
-The MCP server provides dedicated tools for all operations:
-- Use `compile_typespec` instead of `npm run compile` or `atk compile`
-- Use `atk_provision` instead of `atk provision`
-- Use `atk_deploy` instead of `atk deploy`
-- Use `atk_package` instead of `atk package`
-- Use `atk_publish` instead of `atk publish`
-- And so on for all operations...
+The MCP server provides 3 main tools:
+
+1. **`atk_run`** - Unified tool for all ATK commands
+   - Use with `{"command": "provision"}` instead of `atk provision`
+   - Use with `{"command": "deploy"}` instead of `atk deploy`
+   - Use with `{"command": "package"}` instead of `atk package`
+   - Use with `{"command": "publish"}` instead of `atk publish`
+   - And all other ATK commands (new, validate, doctor, login, logout, version)
+
+2. **`compile_typespec`** - TypeSpec compilation
+   - Use instead of `npm run compile` or `atk compile`
+
+3. **`get_best_practices`** - Load best practices documentation
 
 **Why?** MCP tools provide consistent error handling, progress tracking, validation, and proper integration with the MCP protocol.
 

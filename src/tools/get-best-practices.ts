@@ -85,12 +85,18 @@ ${content}
 Now that you have the best practices loaded, you can:
 
 1. **Ask questions** about any of the patterns or practices
-2. **Use other tools** like:
+2. **Use the MCP server tools**:
    - \`compile_typespec\` - Compile TypeSpec declarative agents
-   - Other ATK tools for building and deploying agents
+   - \`atk_run\` - Run any ATK command (provision, deploy, package, publish, validate, new, doctor, etc.)
+     - Example: \`{"command": "provision", "projectPath": "./my-agent", "env": "dev"}\`
 3. **Reference this guide** while building your declarative agent
 
-All tools in this MCP server follow these best practices when generating code.`;
+All tools in this MCP server follow these best practices when generating code.
+
+**Remember:** The MCP server uses 3 main tools:
+- \`atk_run\` for all ATK commands
+- \`compile_typespec\` for TypeSpec compilation
+- \`get_best_practices\` for loading documentation`;
 
     return createSuccessResult(successMessage);
 
@@ -110,7 +116,17 @@ All tools in this MCP server follow these best practices when generating code.`;
 
 export const getBestPracticesToolDefinition = {
   name: 'get_best_practices',
-  description: `Gets best practices for building Microsoft 365 Copilot declarative agents. Call it for any code generation or operation involving declarative agents, TypeSpec, JSON manifests, API plugins, or capabilities. These best practices do not change so once it has been called during the current session, you do not need to invoke it again. Returns a markdown string.`,
+  description: `Gets best practices for building Microsoft 365 Copilot declarative agents.
+
+CRITICAL: Call this tool FIRST before any agent work, including:
+- Creating new agents
+- Modifying existing agents
+- Adding capabilities, features, or APIs to agents
+- Enhancing or making agents "fully-featured"
+- Working with agent instructions or scoping
+- Any code generation involving declarative agents, TypeSpec, JSON manifests, API plugins, or capabilities
+
+The best practices provide essential guidance on capabilities, actions, scoping, authentication, and common patterns. These best practices do not change so once called during the current session, you do not need to invoke it again. Returns a markdown string.`,
   inputSchema: {
     type: 'object',
     properties: {

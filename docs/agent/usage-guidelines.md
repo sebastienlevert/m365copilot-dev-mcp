@@ -6,6 +6,8 @@
 
 ### ❌ NEVER Use These Commands Directly
 
+**CRITICAL**: Do NOT run tasks from `.vscode/tasks.json` or any task runner. Always use the CLI through MCP tools.
+
 - `npm run compile`
 - `npm run build`
 - `npm run deploy`
@@ -15,26 +17,32 @@
 - `atk publish`
 - `atk validate`
 - `atk compile`
+- `atk new`
+- `atk doctor`
+- `atk --version`
+- `atk auth login m365`
+- `atk auth logout m365`
 - `npx @microsoft/m365agentstoolkit-cli ...`
+- Tasks from `.vscode/tasks.json` or any task runner
 - Any other `atk` or CLI commands
 
 ### ✅ ALWAYS Use MCP Server Tools Instead
 
-The MCP server provides dedicated tools for all operations:
+The MCP server provides 3 main tools:
 
 | Instead of... | Use MCP Tool |
 |---------------|--------------|
-| `npm run compile` or `atk compile` | `compile_typespec` |
-| `atk provision` | `atk_provision` |
-| `atk deploy` | `atk_deploy` |
-| `atk package` | `atk_package` |
-| `atk publish` | `atk_publish` |
-| `atk validate` | `atk_validate` |
-| `atk new` | `atk_new` |
-| `atk doctor` | `atk_doctor` |
-| `atk version` | `atk_version` |
-| `atk login` | `atk_login` |
-| `atk logout` | `atk_logout` |
+| `npm run compile` | `compile_typespec` tool |
+| `atk new` | `atk_run` tool with `command: "new"` |
+| `atk provision` | `atk_run` tool with `command: "provision"` |
+| `atk deploy` | `atk_run` tool with `command: "deploy"` |
+| `atk package` | `atk_run` tool with `command: "package"` |
+| `atk publish` | `atk_run` tool with `command: "publish"` |
+| `atk validate` | `atk_run` tool with `command: "validate"` |
+| `atk doctor` | `atk_run` tool with `command: "doctor"` |
+| `atk --version` | `atk_run` tool with `command: "version"` |
+| `atk auth login m365` | `atk_run` tool with `command: "login"` |
+| `atk auth logout m365` | `atk_run` tool with `command: "logout"` |
 
 ## Why Use MCP Server Tools?
 
@@ -51,13 +59,49 @@ The MCP server provides dedicated tools for all operations:
 ```bash
 npm run compile
 ```
-or
+
+✅ **CORRECT:**
+Use the `compile_typespec` tool:
+```json
+{
+  "projectPath": "./my-agent"
+}
+```
+
+## Example: Creating a New Project
+
+❌ **WRONG:**
 ```bash
-atk compile
+atk new my-agent --template declarative-agent --format typespec
 ```
 
 ✅ **CORRECT:**
-Use the `compile_typespec` tool through MCP
+Use the `atk_run` tool:
+```json
+{
+  "command": "new",
+  "name": "my-agent",
+  "template": "declarative-agent",
+  "format": "typespec"
+}
+```
+
+## Example: Provisioning Resources
+
+❌ **WRONG:**
+```bash
+atk provision --env dev
+```
+
+✅ **CORRECT:**
+Use the `atk_run` tool:
+```json
+{
+  "command": "provision",
+  "projectPath": "./my-agent",
+  "env": "dev"
+}
+```
 
 ## Example: Deploying an Agent
 
@@ -67,36 +111,46 @@ atk deploy --env dev
 ```
 
 ✅ **CORRECT:**
-Use the `atk_deploy` tool through MCP with parameters:
+Use the `atk_run` tool:
 ```json
 {
+  "command": "deploy",
+  "projectPath": "./my-agent",
   "env": "dev"
 }
 ```
 
 ## Available Tools
 
-Use these MCP tools for all operations:
+The MCP server provides 3 main tools:
 
-### Project Management
-- `atk_new` - Create new agent projects
-- `atk_doctor` - Diagnose environment setup
-- `atk_version` - Check ATK version
+### 1. `atk_run` - Unified ATK Command Runner
 
-### Authentication
-- `atk_login` - Login to Microsoft 365
-- `atk_logout` - Logout from Microsoft 365
+Run any ATK command through a single tool interface. The `command` parameter determines the operation:
 
-### Development
-- `compile_typespec` - Compile TypeSpec declarative agents
-- `get_best_practices` - Load best practices documentation
+**Project Management Commands:**
+- `{"command": "new"}` - Create new agent projects
+- `{"command": "doctor"}` - Diagnose environment setup
+- `{"command": "version"}` - Check ATK version
 
-### Deployment
-- `atk_provision` - Provision Azure resources
-- `atk_deploy` - Deploy agent code
-- `atk_package` - Package agent for distribution
-- `atk_publish` - Publish agent to Microsoft 365
-- `atk_validate` - Validate agent manifests
+**Authentication Commands:**
+- `{"command": "login"}` - Login to Microsoft 365
+- `{"command": "logout"}` - Logout from Microsoft 365
+
+**Deployment Commands:**
+- `{"command": "provision"}` - Provision Azure resources
+- `{"command": "deploy"}` - Deploy agent code
+- `{"command": "package"}` - Package agent for distribution
+- `{"command": "publish"}` - Publish agent to Microsoft 365
+- `{"command": "validate"}` - Validate agent manifests
+
+### 2. `compile_typespec` - TypeSpec Compilation
+
+Compile TypeSpec declarative agent definitions. Not part of `atk_run` because it uses the TypeSpec compiler directly.
+
+### 3. `get_best_practices` - Best Practices Documentation
+
+Load best practices for building declarative agents (TypeSpec or JSON formats).
 
 ## Validation After Code Generation
 
@@ -104,16 +158,44 @@ Use these MCP tools for all operations:
 
 ### For TypeSpec Projects
 1. **Compile**: Use `compile_typespec` tool to compile TypeSpec code
+   ```json
+   {
+     "projectPath": "./my-agent"
+   }
+   ```
    - This catches syntax errors, type errors, and validation issues
    - Must complete successfully before proceeding
-2. **Package**: Use `atk_package` tool to validate the complete agent package
+
+2. **Package**: Use `atk_run` tool with `command: "package"` to validate the complete agent package
+   ```json
+   {
+     "command": "package",
+     "projectPath": "./my-agent"
+   }
+   ```
+   - The `env` parameter defaults to "local" if not specified
    - This ensures all manifests, resources, and configurations are correct
    - Validates the entire project structure
 
 ### For JSON Projects
-1. **Validate**: Use `atk_validate` tool to validate JSON manifests
+1. **Validate**: Use `atk_run` tool with `command: "validate"` to validate JSON manifests
+   ```json
+   {
+     "command": "validate",
+     "projectPath": "./my-agent"
+   }
+   ```
+   - The `env` parameter defaults to "local" if not specified
    - Checks schema compliance and required fields
-2. **Package**: Use `atk_package` tool to validate the complete agent package
+
+2. **Package**: Use `atk_run` tool with `command: "package"` to validate the complete agent package
+   ```json
+   {
+     "command": "package",
+     "projectPath": "./my-agent"
+   }
+   ```
+   - The `env` parameter defaults to "local" if not specified
    - Ensures all files are properly structured
 
 ### Example Workflow
@@ -122,15 +204,15 @@ After generating or modifying TypeSpec code:
 ```
 1. Generate/modify TypeSpec files
 2. Call compile_typespec tool
-3. If compilation succeeds, call atk_package tool
+3. If compilation succeeds, call atk_run with command: "package"
 4. If both succeed, changes are validated
 ```
 
 After generating or modifying JSON manifests:
 ```
 1. Generate/modify JSON files
-2. Call atk_validate tool
-3. If validation succeeds, call atk_package tool
+2. Call atk_run with command: "validate"
+3. If validation succeeds, call atk_run with command: "package"
 4. If both succeed, changes are validated
 ```
 

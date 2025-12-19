@@ -10,21 +10,34 @@ applyTo: '**/*.tsp'
 **IMPORTANT**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations. NEVER use direct CLI commands.
 
 ### ❌ NEVER Use These Commands Directly
+- **NEVER run tasks from `.vscode/tasks.json` or any task runner** → Always use MCP tools
 - `npm run compile` or `atk compile` → Use `compile_typespec` tool instead
-- `atk provision` → Use `atk_provision` tool instead
-- `atk deploy` → Use `atk_deploy` tool instead
-- `atk package` → Use `atk_package` tool instead
-- `atk publish` → Use `atk_publish` tool instead
-- `atk validate` → Use `atk_validate` tool instead
+- `atk provision` → Use `atk_run` tool with `command: "provision"`
+- `atk deploy` → Use `atk_run` tool with `command: "deploy"`
+- `atk package` → Use `atk_run` tool with `command: "package"`
+- `atk publish` → Use `atk_run` tool with `command: "publish"`
+- `atk validate` → Use `atk_run` tool with `command: "validate"`
 - `npx @microsoft/m365agentstoolkit-cli ...` → Use appropriate MCP tool
 
 ### ✅ ALWAYS Use MCP Server Tools
 All operations MUST go through the MCP server tools for proper error handling, validation, and integration.
 
+**The 3 Main Tools:**
+1. **`atk_run`** - For all ATK commands (provision, deploy, package, publish, validate, new, doctor, login, logout, version)
+2. **`compile_typespec`** - For TypeSpec compilation
+3. **`get_best_practices`** - For loading best practices documentation
+
 ### 🔍 ALWAYS Validate After Code Generation
 After every successful code generation or modification:
 1. **First**: Use `compile_typespec` tool to compile your TypeSpec code
-2. **Then**: Use `atk_package` tool to validate the complete agent package
+   ```json
+   {"projectPath": "./my-agent"}
+   ```
+2. **Then**: Use `atk_run` tool with `command: "package"` to validate the complete agent package
+   ```json
+   {"command": "package", "projectPath": "./my-agent"}
+   ```
+   - The `env` parameter defaults to "local" if not specified
 3. **Never skip** these validation steps - they catch errors early
 
 ---
@@ -222,12 +235,13 @@ Actions define the operations your agent can perform by calling external APIs. A
 - Define actions in dedicated namespaces decorated with `@service` and `@server(url)`.
 - Use `@actions(metadata)` decorator to provide human-readable names and descriptions.
 - Include `descriptionForModel` in action metadata to help the LLM understand when to invoke the action.
-- Define operations using HTTP method decorators: `@get`, `@post`, `@put`, `@delete`.
+- Define operations using HTTP method decorators: `@get`, `@post`, `@put`, `@patch`, `@delete`.
 - Specify routes with `@route("/path/{param}")` decorator.
 - Use `@path`, `@query`, `@body`, `@header` decorators to define parameter sources.
 - Provide default values for optional parameters (e.g., `@query type: PolicyType = PolicyType.Compliance`).
 - Document all parameters with `@doc` comments explaining their purpose and constraints.
 - Explain error scenarios in operation documentation (e.g., `404: Policy not found`).
+- **For PATCH operations**: Use `@patch(#{implicitOptionality: true})` to automatically make all properties optional, supporting partial updates without redefining the model.
 
 ### Complete Action Example
 
@@ -316,6 +330,53 @@ namespace GitHubAPI {
 - **ACTIONS_METADATA**: Contains human-readable information and legal links
 - **Operations**: Define API endpoints with routes, HTTP methods, and parameters
 - **@card**: Optional decorator for rich Adaptive Card responses
+
+### PATCH Operations with Implicit Optionality
+
+For PATCH operations that support partial updates, use `@patch(#{implicitOptionality: true})` to automatically make all model properties optional without redefining the model:
+
+```typespec
+// Define your model with all required fields
+model User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+// PATCH operation with implicit optionality
+// All User properties become optional automatically
+@route("/users/{userId}")
+@patch(#{implicitOptionality: true})
+op updateUser(
+  @path userId: string,
+  @body user: User
+): User;
+```
+
+**Without implicit optionality**, you would need to create a separate model:
+
+```typespec
+// ❌ More verbose approach - avoid this
+model UserUpdate {
+  name?: string;
+  email?: string;
+  role?: string;
+}
+
+@route("/users/{userId}")
+@patch
+op updateUser(
+  @path userId: string,
+  @body user: UserUpdate
+): User;
+```
+
+**Best Practice:**
+- Use `@patch(#{implicitOptionality: true})` to avoid model duplication
+- The decorator automatically makes all properties optional for the PATCH body
+- Keeps your models DRY (Don't Repeat Yourself)
+- Maintains single source of truth for your data models
 
 ### Authentication
 
@@ -416,9 +477,9 @@ namespace API {
 ## Validation and Testing
 
 - **CRITICAL**: Always compile TypeSpec using `compile_typespec` tool before provisioning.
-- **CRITICAL**: After successful compilation, use `atk_package` tool to validate the complete agent package.
+- **CRITICAL**: After successful compilation, use `atk_run` tool with `{"command": "package", "projectPath": "./my-agent"}` to validate the complete agent package (env defaults to "local").
 - Fix all compilation errors and warnings before moving forward.
-- Provision to local environment first using `atk_provision` tool with `env: "local"`.
+- Provision to local environment first using `atk_run` tool with `{"command": "provision", "projectPath": "./my-agent"}` (env defaults to "local").
 - Test the agent in Microsoft 365 Copilot playground with diverse queries.
 - Validate that the agent follows instructions (e.g., calls actions in the correct order).
 - Test error scenarios: missing parameters, invalid IDs, API failures.
@@ -426,7 +487,7 @@ namespace API {
 - Confirm conversation starters appear and work as expected.
 - Test with multiple phrasings to ensure consistent agent behavior.
 - Create test cases for critical workflows and validate after instruction changes.
-- **Remember**: Always use MCP server tools (`compile_typespec`, `atk_package`, `atk_provision`, etc.) - NEVER use direct CLI commands.
+- **Remember**: Always use MCP server tools (`compile_typespec`, `atk_run`) - NEVER use direct CLI commands.
 
 ## Multi-Step Workflows
 
