@@ -5,26 +5,49 @@ applyTo: '**/declarativeAgent.json,**/manifest.json,**/*-apiplugin.json'
 
 # JSON Declarative Agent Development for Microsoft 365 Copilot
 
-## ⚠️ CRITICAL: Always Use MCP Server Tools
+## 🚨 CRITICAL: NEVER USE VSCODE TASKS
 
-**IMPORTANT**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations. NEVER use direct CLI commands.
+**ABSOLUTELY FORBIDDEN:**
 
-### ❌ NEVER Use These Commands Directly
-- **NEVER run tasks from `.vscode/tasks.json` or any task runner** → Always use MCP tools
-- `atk provision` → Use `atk_run` tool with `command: "provision"`
-- `atk deploy` → Use `atk_run` tool with `command: "deploy"`
-- `atk package` → Use `atk_run` tool with `command: "package"`
-- `atk publish` → Use `atk_run` tool with `command: "publish"`
-- `atk validate` → Use `atk_run` tool with `command: "validate"`
-- `npx @microsoft/m365agentstoolkit-cli ...` → Use appropriate MCP tool
+⛔ **NEVER suggest running tasks from .vscode/tasks.json**
+⛔ **NEVER run "Create resources" task** - Use `npx -p @microsoft/m365agentstoolkit-cli@latest atk provision` instead
+⛔ **NEVER run "Deploy" task** - Use `npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy` instead
+⛔ **NEVER run ANY task from VS Code task runner**
 
-### ✅ ALWAYS Use MCP Server Tools
-All operations MUST go through the MCP server tools for proper error handling, validation, and integration.
+**If you see .vscode/tasks.json in a project, COMPLETELY IGNORE IT.**
 
-**The 3 Main Tools:**
-1. **`atk_run`** - For all ATK commands (provision, deploy, package, publish, validate, new, doctor, login, logout, version)
-2. **`compile_typespec`** - For TypeSpec compilation (not needed for JSON projects)
-3. **`get_best_practices`** - For loading best practices documentation
+---
+
+## ⚠️ CRITICAL: Always Use npx @latest for ATK Commands
+
+**IMPORTANT**: When working with ATK CLI, ALWAYS use `npx -p @microsoft/m365agentstoolkit-cli@latest` to ensure you have the latest version.
+
+### ✅ ALWAYS Use npx @latest
+Run all ATK commands via Bash tool with the full npx @latest command:
+
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk <command>
+```
+
+Examples:
+- `npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev`
+- `npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev`
+- `npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev`
+- `npx -p @microsoft/m365agentstoolkit-cli@latest atk validate`
+- `npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false`
+
+### ❌ NEVER Use Shortened Commands
+- **NEVER run tasks from `.vscode/tasks.json`** - Do NOT use VS Code task runner
+- `atk provision` (won't work - not installed globally)
+- `npx atk provision` (won't work - wrong package name)
+- `npx @microsoft/m365agentstoolkit-cli atk provision` (might use cached old version)
+
+### MCP Server Tools
+The MCP server provides 2 specialized tools:
+1. **`compile_typespec`** - For TypeSpec compilation (not needed for JSON projects)
+2. **`get_best_practices`** - For loading best practices documentation
+
+**For ATK CLI commands:** Run them directly with `npx -p @microsoft/m365agentstoolkit-cli@latest atk <command>`. See `docs/ATK_CLI_REFERENCE.md` for complete documentation with all available commands and parameters.
 
 ### 📢 What to Tell Users
 

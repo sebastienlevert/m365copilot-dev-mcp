@@ -126,8 +126,8 @@ Before making ANY changes, you MUST:
 
 5. **Validate Changes**: After making changes:
    - For TypeSpec: Use \`compile_typespec\` tool
-   - Use \`atk_run\` with \`command: "package"\` to validate
-   - Use \`atk_run\` with \`command: "validate"\` for additional checks
+   - Run \`npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev\` to validate packaging
+   - Run \`npx -p @microsoft/m365agentstoolkit-cli@latest atk validate\` for additional checks
 
 ## Arguments
 

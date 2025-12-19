@@ -3,7 +3,6 @@
  * Provides centralized tool management for MCP server
  */
 
-import { atkRunToolDefinition, executeATKRunTool, ATKRunSchema, ATKRunArgs } from './atk-run.js';
 import { compileTypeSpecToolDefinition, executeCompileTypeSpecTool, CompileTypeSpecSchema, CompileTypeSpecArgs } from './compile-typespec.js';
 import { getBestPracticesToolDefinition, executeGetBestPracticesTool, GetBestPracticesSchema, GetBestPracticesArgs } from './get-best-practices.js';
 import { ToolResult } from '../types/atk.js';
@@ -38,11 +37,6 @@ interface ToolRegistryEntry {
 }
 
 const toolRegistry: Map<string, ToolRegistryEntry> = new Map([
-  ['atk_run', {
-    definition: atkRunToolDefinition,
-    executor: executeATKRunTool,
-    schema: ATKRunSchema
-  }],
   ['compile_typespec', {
     definition: compileTypeSpecToolDefinition,
     executor: executeCompileTypeSpecTool,
@@ -121,7 +115,7 @@ export async function callTool(
     return createErrorResult({
       error: 'ToolExecutionError',
       reason: `Failed to execute tool: ${error.message}`,
-      suggestion: 'Check the error details and try again. Run atk_doctor to verify system setup.',
+      suggestion: 'Check the error details and try again. Run `npx -p @microsoft/m365agentstoolkit-cli@latest atk doctor` to verify system setup.',
       details: {
         tool: name,
         error: error.message,
@@ -148,17 +142,14 @@ export function hasTool(name: string): boolean {
 
 // Export all tool schemas and executors for direct use if needed
 export {
-  ATKRunSchema,
   CompileTypeSpecSchema,
   GetBestPracticesSchema,
-  executeATKRunTool,
   executeCompileTypeSpecTool,
   executeGetBestPracticesTool
 };
 
 // Export type definitions
 export type {
-  ATKRunArgs,
   CompileTypeSpecArgs,
   GetBestPracticesArgs
 };

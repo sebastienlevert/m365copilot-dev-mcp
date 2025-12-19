@@ -15,12 +15,20 @@ Whether you prefer keyboard-centric developer operations, or you are automating 
 
 ## Get Started
 
-Install `@microsoft/m365agentstoolkit-cli` from `npm` and run `atk -h` to check all available commands:
+**Recommended:** Use `npx` with `@latest` to always get the latest version without global installation:
+
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk -h
+```
+
+Alternatively, install globally:
 
 ```bash
 npm install -g @microsoft/m365agentstoolkit-cli
 atk -h
 ```
+
+**Best Practice:** Always use `npx -p @microsoft/m365agentstoolkit-cli@latest` in all your commands to ensure you're using the latest version of ATK CLI.
 
 ## Supported Commands
 
@@ -78,7 +86,7 @@ Create a new Microsoft 365 App. Operates in interactive mode by default.
 Create a declarative agent with TypeSpec plugin:
 
 ```bash
-npx --package=@microsoft/m365agentstoolkit-cli atk new -n daTypeSpec -c declarative-agent -with-plugin type-spec -i false
+npx -p @microsoft/m365agentstoolkit-cli@latest atk new -n daTypeSpec -c declarative-agent -with-plugin type-spec -i false
 ```
 
 This creates a TypeSpec-based declarative agent with:
@@ -111,11 +119,17 @@ Run the provision stage in `m365agents.yml`.
 | `--folder -f`       | No       | Project root folder. Default: `./`.                        |
 | `--ignore-env-file` | No       | Skip loading .env file when --env isn't specified.         |
 
-### Example
+### Examples
 
 ```bash
-atk provision --env dev
-atk provision --env local  # Uses m365agents.local.yml
+# Provision to dev environment
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev
+
+# Provision to local environment (uses m365agents.local.yml)
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env local
+
+# Non-interactive mode
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev -i false
 ```
 
 ## atk deploy
@@ -131,11 +145,17 @@ Run the deploy stage in `m365agents.yml`.
 | `--config-file-path -c` | No       | Path of the configuration yaml file.           |
 | `--ignore-env-file`     | No       | Skip loading .env file when --env isn't specified. |
 
-### Example
+### Examples
 
 ```bash
-atk deploy --env dev
-atk deploy --env local  # Uses m365agents.local.yml
+# Deploy to dev environment
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev
+
+# Deploy to local environment (uses m365agents.local.yml)
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env local
+
+# Non-interactive mode
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev -i false
 ```
 
 ## atk package
@@ -152,11 +172,17 @@ Build your Microsoft 365 App into a package for publishing.
 | `--output-package-file` | No       | Output zip path. Default: `./appPackage/build/appPackage.${env}.zip`.              |
 | `--folder -f`           | No       | Project root folder. Default: `./`.                                                 |
 
-### Example
+### Examples
 
 ```bash
-atk package --env dev
-atk package --env prod --output-folder ./dist
+# Package for dev environment
+npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev
+
+# Package for production with custom output folder
+npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env prod --output-folder ./dist
+
+# Non-interactive mode
+npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev -i false
 ```
 
 ## atk publish
@@ -171,11 +197,88 @@ Run the publish stage in `m365agents.yml`.
 | `--manifest-file` | No       | App manifest file path. Default: `./appPackage/manifest.json`. |
 | `--folder -f`     | No       | Project root folder. Default: `./`.                        |
 
-### Example
+### Examples
 
 ```bash
-atk publish --env prod
+# Publish to production
+npx -p @microsoft/m365agentstoolkit-cli@latest atk publish --env prod
+
+# Non-interactive mode
+npx -p @microsoft/m365agentstoolkit-cli@latest atk publish --env prod -i false
 ```
+
+## atk share
+
+Share your agent with specific users/groups or with your entire tenant.
+
+**⚠️ IMPORTANT Prerequisites:**
+1. You must provision the agent first
+2. The agent must have `AGENT_SCOPE=shared` in the environment file (`env/.env.{environment}`)
+3. Agents without AGENT_SCOPE=shared should not be shared
+
+### Parameters
+
+| Parameter    | Required | Description                                                                           |
+| :----------- | :------- | :------------------------------------------------------------------------------------ |
+| `--scope`    | Yes      | Share scope. Options: `users` (specific users/groups) or `tenant` (entire tenant).   |
+| `--email`    | Conditional | CSV list of user/group emails. Required when `--scope users`.                      |
+| `--env`      | No       | Environment name. Default: `dev`.                                                     |
+| `--folder -f`| No       | Project root folder. Default: `./`.                                                   |
+| `-i`         | No       | Interactive mode. Set to `false` for non-interactive. Default: `true`.                |
+
+### Prerequisites
+
+Before sharing, ensure these conditions are met:
+
+1. **Agent is provisioned:** The environment file must exist: `env/.env.{environment}` (e.g., `env/.env.dev`)
+2. **M365_TITLE_ID exists:** The environment file must contain `M365_TITLE_ID` (generated during provision)
+3. **⚠️ AGENT_SCOPE is set to shared:** The environment file must contain `AGENT_SCOPE=shared`
+
+**If AGENT_SCOPE is not set to shared, DO NOT share the agent.** Personal-scoped agents should not be shared.
+
+If not provisioned, run:
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev
+```
+
+**To set AGENT_SCOPE=shared:**
+Add this line to your `env/.env.{environment}` file:
+```
+AGENT_SCOPE=shared
+```
+
+### Examples
+
+**Share with entire tenant (using npx):**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false
+```
+
+**Share with specific users:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope users --email 'user1@contoso.com,user2@contoso.com' --env dev -i false
+```
+
+**Share with users and groups:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope users --email 'user@contoso.com,group@contoso.com' --env dev -i false
+```
+
+**Share to local environment:**
+```bash
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env local -i false
+```
+
+### Common Issues
+
+**Error: Environment not provisioned**
+- Ensure you've run `atk provision --env {environment}` first
+- Check that `env/.env.{environment}` exists and contains `M365_TITLE_ID`
+
+**Error: UnknownOptionError**
+- Make sure to use `--scope` (not `--with`)
+- For users scope, use `--email` parameter
+- Always set `-i false` for non-interactive mode
 
 ## atk validate
 
@@ -376,24 +479,29 @@ For building type-safe declarative agents:
 
 ### Deployment Workflow
 
-Complete deployment sequence:
+Complete deployment sequence using `npx @latest`:
 
 ```bash
 # 1. Validate
-atk validate --manifest-file ./appPackage/manifest.json
+npx -p @microsoft/m365agentstoolkit-cli@latest atk validate --manifest-file ./appPackage/manifest.json
 
 # 2. Provision (first time only)
-atk provision --env dev
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev
 
-# 3. Deploy
-atk deploy --env dev
+# 3. Deploy (if your agent has backend code)
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev
 
 # 4. Package
-atk package --env dev
+npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev
 
-# 5. Publish
-atk publish --env dev
+# 5. Share with users or tenant
+npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false
+
+# 6. Publish (optional - for app store submission)
+npx -p @microsoft/m365agentstoolkit-cli@latest atk publish --env dev
 ```
+
+**Note:** Always use `npx -p @microsoft/m365agentstoolkit-cli@latest` to ensure you're using the latest version.
 
 ## Common Issues
 
@@ -404,8 +512,8 @@ atk publish --env dev
 **Solution:**
 ```bash
 npm install -g @microsoft/m365agentstoolkit-cli
-# Or use npx:
-npx --package=@microsoft/m365agentstoolkit-cli atk --version
+# Or use npx @latest (recommended):
+npx -p @microsoft/m365agentstoolkit-cli@latest atk --version
 ```
 
 ### Authentication Required
@@ -424,8 +532,8 @@ atk auth login  # For Microsoft 365
 
 **Solution:**
 ```bash
-atk provision --env dev  # Provision first
-atk deploy --env dev     # Then deploy
+npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev  # Provision first
+npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev     # Then deploy
 ```
 
 ## Additional Resources

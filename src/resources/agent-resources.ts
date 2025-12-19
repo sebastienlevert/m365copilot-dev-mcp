@@ -63,33 +63,57 @@ Read the usage guidelines:
 
 ### 3. Common Scenarios
 
-**Creating a new agent**: \`get_best_practices\` → \`atk_run\` with \`command: "new"\`
+**Creating a new agent**: \`get_best_practices\` → Run \`npx -p @microsoft/m365agentstoolkit-cli@latest atk new\` via Bash
 
-**Enhancing an existing agent**: \`get_best_practices\` → Review code → Make changes → \`compile_typespec\` → \`atk_run\` with \`command: "package"\`
+**Enhancing an existing agent**: \`get_best_practices\` → Review code → Make changes → \`compile_typespec\` → \`npx @latest atk package\` via Bash
 
 **Adding capabilities**: \`get_best_practices\` (to see all available capabilities) → Add to definitions with proper scoping
 
-## The 3 Main MCP Tools
+## The 2 Main MCP Tools
 
 1. **\`get_best_practices\`** - Load best practices documentation
 2. **\`compile_typespec\`** - Compile TypeSpec agents
-3. **\`atk_run\`** - Run all ATK commands (provision, deploy, package, validate, etc.)
+
+## ATK CLI Commands
+
+Run all ATK CLI commands directly with \`npx -p @microsoft/m365agentstoolkit-cli@latest\`:
+
+- Always use \`@latest\` to ensure the latest version
+- See docs/ATK_CLI_REFERENCE.md for complete CLI documentation
+- Examples:
+  - \`npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev\`
+  - \`npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev\`
+  - \`npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false\`
 
 ## Remember
 
 Always start with \`get_best_practices\` - it contains critical information you need to do agent work correctly.
 
-## 📢 CRITICAL: What to Tell Users
+## 🚨 CRITICAL: NEVER USE VSCODE TASKS
 
-**NEVER suggest direct CLI commands to users**. Always reference MCP tools:
+**ABSOLUTELY FORBIDDEN:**
 
-❌ WRONG: "Run \`atk provision --env local\`"
-✅ CORRECT: "Use the \`atk_run\` tool with \`{\"command\": \"provision\", \"projectPath\": \"./project\", \"env\": \"local\"}\`"
+⛔ NEVER suggest running tasks from .vscode/tasks.json
+⛔ NEVER run "Create resources" task (use CLI instead)
+⛔ NEVER run "Deploy" task (use CLI instead)
+⛔ NEVER run "Compile" task (use compile_typespec tool instead)
+⛔ NEVER run ANY task from VS Code task runner
 
-❌ WRONG: "Run \`npm run compile\`"
-✅ CORRECT: "Use the \`compile_typespec\` tool with \`{\"projectPath\": \"./project\"}\`"
+If you see .vscode/tasks.json, IGNORE IT COMPLETELY.
 
-The MCP server is the ONLY interface - all operations go through tools.`;
+---
+
+## 📢 CRITICAL: How to Run ATK Commands
+
+**ALWAYS use npx with @latest for ATK commands**:
+
+✅ CORRECT: \`npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev\`
+✅ CORRECT: \`npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope users --email 'user@domain.com' --env dev -i false\`
+
+❌ WRONG: "Use the \`atk_run\` tool" (this tool has been removed)
+❌ WRONG: "Run \`atk provision\`" without npx @latest
+
+The MCP server provides \`compile_typespec\` and \`get_best_practices\` tools. For ATK CLI commands, run them directly with \`npx @latest\`.`;
     }
   },
   {

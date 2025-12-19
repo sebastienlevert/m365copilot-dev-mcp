@@ -16,7 +16,8 @@
       "Bash(m365copilot-dev-mcp:*)",
       "Bash(ls:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(find:*)"
     ]
   }
 }

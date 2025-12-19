@@ -5,32 +5,55 @@ applyTo: '**/*.tsp'
 
 # TypeSpec Declarative Agent Development for Microsoft 365 Copilot
 
-## ⚠️ CRITICAL: Always Use MCP Server Tools
+## 🚨 CRITICAL: NEVER USE VSCODE TASKS
 
-**IMPORTANT**: When working with this MCP server, you MUST use the provided MCP tools for ALL operations. NEVER use direct CLI commands.
+**ABSOLUTELY FORBIDDEN:**
 
-### ❌ NEVER Use These Commands Directly
+⛔ **NEVER suggest running tasks from .vscode/tasks.json**
+⛔ **NEVER run "Create resources" task** - Use `npx -p @microsoft/m365agentstoolkit-cli@latest atk provision` instead
+⛔ **NEVER run "Deploy" task** - Use `npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy` instead
+⛔ **NEVER run "Compile" task** - Use `compile_typespec` tool instead
+⛔ **NEVER run ANY task from VS Code task runner**
 
-**ABSOLUTELY FORBIDDEN - These will cause problems**:
-- **NEVER run tasks from `.vscode/tasks.json` or any task runner** → Always use MCP tools
-- `npm run compile` → Use `compile_typespec` tool instead
-- `cd /path && npm run compile` → Use `compile_typespec` tool instead
-- `atk compile` → Use `compile_typespec` tool instead
-- Any variation of npm/cd commands for compilation → Use `compile_typespec` tool instead
-- `atk provision` → Use `atk_run` tool with `command: "provision"`
-- `atk deploy` → Use `atk_run` tool with `command: "deploy"`
-- `atk package` → Use `atk_run` tool with `command: "package"`
-- `atk publish` → Use `atk_run` tool with `command: "publish"`
-- `atk validate` → Use `atk_run` tool with `command: "validate"`
-- `npx @microsoft/m365agentstoolkit-cli ...` → Use appropriate MCP tool
+**If you see .vscode/tasks.json in a project, COMPLETELY IGNORE IT.**
 
-### ✅ ALWAYS Use MCP Server Tools
-All operations MUST go through the MCP server tools for proper error handling, validation, and integration.
+---
 
-**The 3 Main Tools:**
-1. **`atk_run`** - For all ATK commands (provision, deploy, package, publish, validate, new, doctor, login, logout, version)
-2. **`compile_typespec`** - For TypeSpec compilation
-3. **`get_best_practices`** - For loading best practices documentation
+## ⚠️ CRITICAL: Always Use Correct Commands
+
+**IMPORTANT**: Use MCP tools for TypeSpec compilation and `npx @latest` for ATK CLI commands.
+
+### ✅ ALWAYS Use These Approaches
+
+**For TypeSpec Compilation:**
+- Use `compile_typespec` MCP tool (NOT npm run compile or atk compile)
+- Example: `{"projectPath": "./my-agent"}`
+
+**For ATK CLI Commands:**
+- ALWAYS use `npx -p @microsoft/m365agentstoolkit-cli@latest atk <command>`
+- Examples:
+  - `npx -p @microsoft/m365agentstoolkit-cli@latest atk provision --env dev`
+  - `npx -p @microsoft/m365agentstoolkit-cli@latest atk deploy --env dev`
+  - `npx -p @microsoft/m365agentstoolkit-cli@latest atk package --env dev`
+  - `npx -p @microsoft/m365agentstoolkit-cli@latest atk share --scope tenant --env dev -i false`
+
+### ❌ NEVER Use These
+
+**DO NOT use any of these**:
+- **NEVER run tasks from `.vscode/tasks.json`** - Do NOT use VS Code task runner
+- `npm run compile` (use `compile_typespec` tool)
+- `cd /path && npm run compile` (use `compile_typespec` tool)
+- `atk compile` (use `compile_typespec` tool)
+- `atk provision` without npx (won't work - not installed globally)
+- `npx atk provision` (wrong package name)
+- `npx @microsoft/m365agentstoolkit-cli atk provision` without @latest (might use old cached version)
+
+### MCP Server Tools
+The MCP server provides 2 specialized tools:
+1. **`compile_typespec`** - For TypeSpec compilation
+2. **`get_best_practices`** - For loading best practices documentation
+
+**For ATK CLI commands:** Run them directly with `npx -p @microsoft/m365agentstoolkit-cli@latest atk <command>`. See `docs/ATK_CLI_REFERENCE.md` for complete documentation with all available commands and parameters.
 
 ### 📢 What to Tell Users
 
