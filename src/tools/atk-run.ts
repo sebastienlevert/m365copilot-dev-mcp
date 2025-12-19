@@ -25,12 +25,13 @@ export const ATKRunSchema = z.object({
     'doctor',
     'version',
     'login',
-    'logout'
+    'logout',
+    'share'
   ]).describe('The ATK command to run'),
 
   // Common parameters
   projectPath: z.string().optional().describe('Path to the project directory (not needed for doctor/version/login/logout)'),
-  env: z.string().optional().describe('Environment name (dev, local, prod, etc.) - used by provision, deploy, package, publish'),
+  env: z.string().optional().describe('Environment name (dev, local, prod, etc.) - used by provision, deploy, package, publish, share'),
 
   // New project parameters
   name: z.string().optional().describe('Project name (required for new command)'),
@@ -40,6 +41,10 @@ export const ATKRunSchema = z.object({
 
   // Login parameters
   tenant: z.string().optional().describe('Tenant ID for login'),
+
+  // Share parameters
+  scope: z.string().optional().describe('Share scope for share command: "users" (share with specific users) or "tenant" (share with entire tenant)'),
+  email: z.string().optional().describe('For users scope: CSV list of user/group emails (e.g., "user@domain.com,group@domain.com")'),
 
   // Additional flags
   interactive: z.boolean().optional().describe('Run in interactive mode'),
@@ -76,6 +81,26 @@ function hasDeployAction(projectPath: string, env?: string): boolean {
     // The actual command will handle any file errors
     return true;
   }
+}
+
+/**
+ * Get or create environment file path for a given environment
+ */
+function getEnvFilePath(projectPath: string, env: string): string {
+  return join(projectPath, 'env', `.env.${env}`);
+}
+
+/**
+ * Check if M365_TITLE_ID is defined in environment file (indicates project has been provisioned)
+ */
+function hasM365TitleId(projectPath: string, env: string): boolean {
+  const envFile = getEnvFilePath(projectPath, env);
+  if (!existsSync(envFile)) {
+    return false;
+  }
+
+  const content = readFileSync(envFile, 'utf-8');
+  return /^M365_TITLE_ID=/m.test(content);
 }
 
 /**
@@ -255,6 +280,67 @@ export async function executeATKRunTool(rawArgs: unknown): Promise<ToolResult> {
       }
       break;
 
+    case 'share':
+      if (!args.projectPath) {
+        return createErrorResult({
+          error: 'MissingProjectPath',
+          reason: 'The "share" command requires a projectPath parameter',
+          suggestion: 'Provide the path to the project directory',
+          details: { command: 'share' }
+        });
+      }
+
+      // Default env to local if not provided
+      if (!args.env) {
+        args.env = 'local';
+      }
+
+      // Handle scope parameter
+      if (!args.scope) {
+        return createErrorResult({
+          error: 'MissingScopeParameter',
+          reason: 'The "share" command requires a scope parameter',
+          suggestion: 'Provide scope as either "users" or "tenant"',
+          details: { command: 'share' }
+        });
+      }
+
+      if (args.scope !== 'users' && args.scope !== 'tenant') {
+        return createErrorResult({
+          error: 'InvalidScope',
+          reason: `Invalid scope value: "${args.scope}". Must be "users" or "tenant"`,
+          suggestion: 'Use scope="users" or scope="tenant"',
+          details: { scope: args.scope }
+        });
+      }
+
+      // For users scope, handle email parameter
+      if (args.scope === 'users') {
+        if (!args.email) {
+          return createErrorResult({
+            error: 'MissingEmailParameter',
+            reason: 'Users scope requires an email parameter',
+            suggestion: 'Provide email as a CSV list of user/group emails (e.g., "user@domain.com,group@domain.com")',
+            details: { scope: 'users' }
+          });
+        }
+
+        // Add --email parameter to ATK command
+        atkArgs.push('--email', args.email);
+      }
+
+      // Add --scope parameter to ATK command
+      atkArgs.push('--scope', args.scope);
+
+      // Add env parameter
+      if (args.env) {
+        atkArgs.push('--env', args.env);
+      }
+
+      // Add -i false to disable interactive mode
+      atkArgs.push('-i', 'false');
+      break;
+
     case 'doctor':
     case 'version':
     case 'logout':
@@ -303,7 +389,7 @@ export async function executeATKRunTool(rawArgs: unknown): Promise<ToolResult> {
 
     // Deploy requires provisioning to have been done first
     if (args.command === 'deploy' && args.env) {
-      const envFile = `${cwd}/.env.${args.env}`;
+      const envFile = getEnvFilePath(cwd, args.env);
       if (!existsSync(envFile)) {
         return createErrorResult({
           error: 'EnvironmentNotProvisioned',
@@ -323,6 +409,37 @@ export async function executeATKRunTool(rawArgs: unknown): Promise<ToolResult> {
 
 This project does not have a deploy action configured, so there is nothing to deploy.
 If you need to deploy code, add a deploy action to your m365agents.yml file.`);
+      }
+    }
+
+    // Share requires provisioning to have been done first
+    if (args.command === 'share' && args.env) {
+      const envFile = getEnvFilePath(cwd, args.env);
+      if (!existsSync(envFile)) {
+        return createErrorResult({
+          error: 'EnvironmentNotProvisioned',
+          reason: `Environment '${args.env}' has not been provisioned yet`,
+          suggestion: `Run atk_run with command "provision" first for environment "${args.env}"`,
+          details: {
+            projectPath: cwd,
+            environment: args.env,
+            expectedEnvFile: envFile
+          }
+        });
+      }
+
+      // Check if M365_TITLE_ID exists in env file
+      if (!hasM365TitleId(cwd, args.env)) {
+        return createErrorResult({
+          error: 'ProvisioningNotComplete',
+          reason: `Environment '${args.env}' has not been fully provisioned (M365_TITLE_ID not found)`,
+          suggestion: `Run atk_run with command "provision" first for environment "${args.env}" to complete the provisioning process`,
+          details: {
+            projectPath: cwd,
+            environment: args.env,
+            envFile: envFile
+          }
+        });
       }
     }
   }
@@ -354,6 +471,9 @@ If you need to deploy code, add a deploy action to your m365agents.yml file.`);
     case 'login':
     case 'logout':
       timeout = ATK_TIMEOUTS.auth;
+      break;
+    case 'share':
+      timeout = ATK_TIMEOUTS.deploy; // Use deploy timeout as share is similar
       break;
   }
 
@@ -432,6 +552,7 @@ function getCommandSpecificError(command: string): string {
     'login': 'Common issues:\n- Invalid tenant ID\n- Browser not available\n- Network connectivity issues',
     'logout': 'Common issues:\n- Not currently logged in\n- Network connectivity issues',
     'doctor': 'Common issues:\n- Missing dependencies\n- Version conflicts',
+    'share': 'Common issues:\n- Missing scope parameter (users or tenant)\n- Missing email parameter for users scope\n- Invalid email format in CSV list\n- Not logged in (use atk_run with command: "login")\n- Project not provisioned (M365_TITLE_ID not found in env file)',
   };
 
   return errors[command] || 'Check the error message above for details.';
@@ -442,7 +563,7 @@ export const atkRunToolDefinition = {
   description: `Run any Microsoft 365 Agents Toolkit (ATK) CLI command through a unified interface.
 
 **Purpose:**
-Provides a single tool to execute all ATK commands (new, provision, deploy, package, publish, validate, doctor, version, login, logout) with appropriate parameters.
+Provides a single tool to execute all ATK commands (new, provision, deploy, package, publish, share, validate, doctor, version, login, logout) with appropriate parameters.
 
 **Commands:**
 - **new**: Create a new agent project
@@ -450,6 +571,7 @@ Provides a single tool to execute all ATK commands (new, provision, deploy, pack
 - **deploy**: Deploy agent code to Azure
 - **package**: Create app package for distribution
 - **publish**: Publish agent to Microsoft 365 (Note: Microsoft employees must use https://substrate.microsoft.net/v2/build instead)
+- **share**: Share agent with specific users/groups or entire tenant
 - **validate**: Validate agent manifests and configuration
 - **doctor**: Diagnose environment and dependencies
 - **version**: Show ATK CLI version (automatically uses \`atk --version\`)
@@ -459,7 +581,11 @@ Provides a single tool to execute all ATK commands (new, provision, deploy, pack
 **Common Parameters:**
 - \`command\`: (required) The ATK command to run
 - \`projectPath\`: Path to project directory (required for most commands except doctor/version/login/logout)
-- \`env\`: Environment name like "dev", "local", "prod". Defaults to "local" for provision, deploy, package, and validate commands. Required for publish command.
+- \`env\`: Environment name like "dev", "local", "prod". Defaults to "local" for provision, deploy, package, validate, and share commands. Required for publish command.
+
+**Share Command Parameters:**
+- \`scope\`: (required) Either "users" (share with specific users) or "tenant" (share with entire tenant)
+- \`email\`: (required for users scope) CSV list of user/group emails (e.g., "user@domain.com,group@domain.com")
 
 **Important Notes:**
 - **Microsoft Employees**: If you are logged in with a @microsoft.com account, the publish command will be blocked. Microsoft employees must use the Microsoft 365 Core Dev Center instead: https://substrate.microsoft.net/v2/build
@@ -536,13 +662,37 @@ Login to specific tenant:
 Logout from Microsoft 365:
 {
   "command": "logout"
+}
+
+Share agent with entire tenant (env defaults to "local"):
+{
+  "command": "share",
+  "projectPath": "./my-agent",
+  "scope": "tenant"
+}
+
+Share agent with entire tenant (dev environment):
+{
+  "command": "share",
+  "projectPath": "./my-agent",
+  "scope": "tenant",
+  "env": "dev"
+}
+
+Share agent with specific users/groups:
+{
+  "command": "share",
+  "projectPath": "./my-agent",
+  "scope": "users",
+  "email": "user1@domain.com,user2@domain.com,group@domain.com",
+  "env": "dev"
 }`,
   inputSchema: {
     type: 'object',
     properties: {
       command: {
         type: 'string',
-        enum: ['new', 'provision', 'deploy', 'package', 'publish', 'validate', 'doctor', 'version', 'login', 'logout'],
+        enum: ['new', 'provision', 'deploy', 'package', 'publish', 'share', 'validate', 'doctor', 'version', 'login', 'logout'],
         description: 'The ATK command to run'
       },
       projectPath: {
@@ -551,7 +701,7 @@ Logout from Microsoft 365:
       },
       env: {
         type: 'string',
-        description: 'Environment name (dev, local, prod, etc.). Defaults to "local" for provision, deploy, package, and validate. Required for publish command.'
+        description: 'Environment name (dev, local, prod, etc.). Defaults to "local" for provision, deploy, package, validate, and share. Required for publish command.'
       },
       name: {
         type: 'string',
@@ -572,6 +722,14 @@ Logout from Microsoft 365:
       tenant: {
         type: 'string',
         description: 'Tenant ID for login'
+      },
+      scope: {
+        type: 'string',
+        description: 'Share scope for share command: "users" (share with specific users) or "tenant" (share with entire tenant)'
+      },
+      email: {
+        type: 'string',
+        description: 'For users scope: CSV list of user/group emails (e.g., "user@domain.com,group@domain.com")'
       },
       interactive: {
         type: 'boolean',
